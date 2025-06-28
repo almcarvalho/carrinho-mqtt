@@ -9,8 +9,8 @@ client.on('connect', () => {
   console.log('MQTT conectado');
 });
 
-app.post('/comando', (req, res) => {
-  const comando = req.body.comando;
+app.get('/comando', (req, res) => {
+  const comando = req.query.comando;
   if (!comando) return res.status(400).send("Comando inválido");
   client.publish('carrinho/comando', comando);
   res.send("Comando enviado: " + comando);
