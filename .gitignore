@@ -1,0 +1,25 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json
+.env
+
+# IDEs e editores
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# SO (Sistema Operacional)
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Build / Output
+dist/
+build/
