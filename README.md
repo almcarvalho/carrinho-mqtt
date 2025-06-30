@@ -1,68 +1,47 @@
-carrinho mqtt (backend em node.js)
+from pathlib import Path
 
-📄 Controle do Carrinho – API MQTT
+readme_content = """
+# 🚗 Controle do Carrinho – API MQTT
 
-🌐 Base URL
-https://carrinho-mqtt-b41bxxb118.herokuapp.com
+API responsável por intermediar comandos HTTP e publicações MQTT para controlar um carrinho robô via broker MQTT (HiveMQ).
 
-Endpoints
+🌐 Base URL:  
+https://carrinho-mqtt-b41bxxxb118.herokuapp.com
 
-GET /comando
+---
+
+## 📦 Endpoints
+
+### 🔹 GET /comando
+
 Envia um comando via MQTT para o carrinho.
 
-Parâmetros de Consulta
+📥 Parâmetros de consulta:
 
-Parâmetro	Tipo	Obrigatório	Descrição
-comando	string	Sim	O comando a ser enviado (ex: frente, fire...)
-Comandos disponíveis
+| Parâmetro | Tipo   | Obrigatório | Descrição                                     |
+|-----------|--------|-------------|-----------------------------------------------|
+| comando   | string | Sim         | O comando a ser enviado (ex: frente, fire...) |
 
-Comando	Ação
-frente	Move o carrinho para frente
-tras	Move o carrinho para trás
-esquerda	Gira o carrinho para esquerda
-direita	Gira o carrinho para direita
-farol	Liga ou desliga o farol
-buzina	Ativa a buzina
-canhao-cima	Move o canhão para cima
-canhao-baixo	Move o canhão para baixo
-canhao-esquerda	Move o canhão para a esquerda
-canhao-direita	Move o canhão para a direita
-fire	Dispara o canhão
-Respostas
+🎮 Comandos disponíveis:
 
-200 OK
-Exemplo:
-Comando enviado: frente
-400 Bad Request
-Exemplo:
-Comando inválido
-GET /status
-Consulta se o carrinho está online.
+| Comando           | Ação                            |
+|-------------------|---------------------------------|
+| frente            | Move o carrinho para frente     |
+| tras              | Move o carrinho para trás       |
+| esquerda          | Gira o carrinho para esquerda   |
+| direita           | Gira o carrinho para direita    |
+| farol             | Liga ou desliga o farol         |
+| buzina            | Ativa a buzina                  |
+| canhao-cima       | Move o canhão para cima         |
+| canhao-baixo      | Move o canhão para baixo        |
+| canhao-esquerda   | Move o canhão para a esquerda   |
+| canhao-direita    | Move o canhão para a direita    |
+| fire              | Dispara o canhão                |
 
-O status é lido do tópico MQTT carrinho/status (valores esperados: ONLINE ou OFFLINE).
+📤 Respostas:
 
-Respostas
+- ✅ 200 OK  
 
-200 OK
-online
-400 Bad Request
-offline
-Middleware
-
-Esta API possui CORS habilitado para todas as origens:
-
-app.use(cors());
-Para restringir para um domínio específico:
-
-app.use(cors({
-  origin: 'https://seusite.netlify.app'
-}));
-Exemplo de Uso
-
-curl:
-
-curl "https://carrinho-mqtt-b41b2fefb118.herokuapp.com/comando?comando=frente"
-curl "https://carrinho-mqtt-b41b2fefb118.herokuapp.com/status"
 
 
 
