@@ -1,6 +1,3 @@
-from pathlib import Path
-
-readme_content = """
 # 🚗 Controle do Carrinho – API MQTT
 
 API responsável por intermediar comandos HTTP e publicações MQTT para controlar um carrinho robô via broker MQTT (HiveMQ).
