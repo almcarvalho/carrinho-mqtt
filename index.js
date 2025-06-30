@@ -1,6 +1,15 @@
 const express = require('express');
 const mqtt = require('mqtt');
+const cors = require('cors'); 
 const app = express();
+
+app.use(cors()); // 👈 habilita CORS para todas as rotas
+
+/* exemplo mais seguro do cors 
+app.use(cors({
+  origin: 'https://seusite.netlify.app'
+  })); */
+
 app.use(express.json());
 
 const client = mqtt.connect('mqtt://broker.hivemq.com');
