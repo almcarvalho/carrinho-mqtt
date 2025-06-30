@@ -13,6 +13,9 @@ https://carrinho-mqtt-b41bxxxb118.herokuapp.com
 
 Envia um comando via MQTT para o carrinho.
 
+Exemplo:
+curl --location 'https://carrinho-mqtt-b4xxxxxxb118.herokuapp.com/comando?comando=frente'
+
 📥 Parâmetros de consulta:
 
 | Parâmetro | Tipo   | Obrigatório | Descrição                                     |
@@ -37,7 +40,23 @@ Envia um comando via MQTT para o carrinho.
 
 📤 Respostas:
 
+- ✅ 200 OK
+
+
+### 🔹 GET /status
+
+Consulta o status atual do carrinho (online ou offline), baseado no tópico MQTT carrinho/status.
+
+📤 Respostas:
+
 - ✅ 200 OK  
+online
+
+Sempre exibir os detalhes
+
+
+- ❌ 400 Bad Request  
+offline
 
 
 
