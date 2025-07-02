@@ -49,7 +49,7 @@ app.get('/status', (req, res) => {
   }
 });
 
-app.get('/camera.jpg', (req, res) => {
+app.get('/camera', (req, res) => {
   if (!ultimaImagemBuffer) {
     return res.status(404).send('Nenhuma imagem disponível no momento');
   }
