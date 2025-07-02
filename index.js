@@ -1,16 +1,17 @@
 const express = require('express');
 const mqtt = require('mqtt');
 const cors = require('cors');
+const multer = require('multer'); // <-- Adicionado
+const upload = multer();          // <-- Adicionado
+
 const app = express();
 
-app.use(cors()); // Habilita CORS para todas as rotas
+app.use(cors());
 app.use(express.json());
 
 const client = mqtt.connect('mqtt://broker.hivemq.com');
 
-// Estado atual do carrinho
 let statusCarrinho = 'OFFLINE';
-// Última imagem recebida da câmera
 let ultimaImagemBuffer = null;
 
 client.on('connect', () => {
@@ -59,11 +60,13 @@ app.get('/camera.jpg', (req, res) => {
 
 app.post('/upload', upload.single('image'), (req, res) => {
   const imageBuffer = req.file.buffer;
-  // Salvar, processar ou repassar a imagem
-  console.log("Imagem: ");
+  console.log("Imagem recebida via HTTPS:");
   console.log(imageBuffer);
-});
 
+  ultimaImagemBuffer = imageBuffer; // opcional: reaproveita no /camera.jpg
+
+  res.status(200).send('Imagem recebida com sucesso!');
+});
 
 app.listen(process.env.PORT || 3000, () => {
   console.log("Servidor online");
