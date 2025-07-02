@@ -57,6 +57,14 @@ app.get('/camera.jpg', (req, res) => {
   res.send(ultimaImagemBuffer);
 });
 
+app.post('/upload', upload.single('image'), (req, res) => {
+  const imageBuffer = req.file.buffer;
+  // Salvar, processar ou repassar a imagem
+  console.log("Imagem: ");
+  console.log(imageBuffer);
+});
+
+
 app.listen(process.env.PORT || 3000, () => {
   console.log("Servidor online");
 });
