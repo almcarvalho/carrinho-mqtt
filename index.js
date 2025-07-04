@@ -1,10 +1,15 @@
 const express = require('express');
 const mqtt = require('mqtt');
 const cors = require('cors');
-const multer = require('multer'); // <-- Adicionado
-const upload = multer();          // <-- Adicionado
+const multer = require('multer');
+const http = require('http');
+const { Server } = require('ws'); // WebSocket
 
+const upload = multer();
 const app = express();
+const server = http.createServer(app); // <-- Usado para Express + WS
+
+const wss = new Server({ server }); // WebSocket server
 
 app.use(cors());
 app.use(express.json());
@@ -14,6 +19,7 @@ const client = mqtt.connect('mqtt://broker.hivemq.com');
 let statusCarrinho = 'OFFLINE';
 let ultimaImagemBuffer = null;
 
+// === MQTT ===
 client.on('connect', () => {
   console.log('MQTT conectado');
   client.subscribe('carrinho/status');
@@ -34,6 +40,7 @@ client.on('message', (topic, message) => {
   }
 });
 
+// === HTTP Endpoints ===
 app.get('/comando', (req, res) => {
   const comando = req.query.comando;
   if (!comando) return res.status(400).send("Comando inválido");
@@ -63,11 +70,29 @@ app.post('/upload', upload.single('image'), (req, res) => {
   console.log("Imagem recebida via HTTPS:");
   console.log(imageBuffer);
 
-  ultimaImagemBuffer = imageBuffer; // opcional: reaproveita no /camera.jpg
+  ultimaImagemBuffer = imageBuffer;
 
   res.status(200).send('Imagem recebida com sucesso!');
 });
 
-app.listen(process.env.PORT || 3000, () => {
-  console.log("Servidor online");
+// === WebSocket ===
+wss.on('connection', (ws) => {
+  console.log('Novo cliente WebSocket conectado');
+
+  ws.on('message', (data, isBinary) => {
+    if (isBinary) {
+      ultimaImagemBuffer = Buffer.from(data);
+      console.log('Imagem recebida via WebSocket');
+    } else {
+      console.log('Mensagem WS:', data.toString());
+    }
+  });
+
+  ws.send('Conexão WebSocket estabelecida');
+});
+
+// === Start do servidor ===
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Servidor online na porta ${PORT}`);
 });
