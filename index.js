@@ -3,13 +3,17 @@ const mqtt = require('mqtt');
 const cors = require('cors');
 const multer = require('multer');
 const http = require('http');
-const { Server } = require('ws'); // WebSocket
+const { Server } = require('socket.io'); // socket.io
 
 const upload = multer();
 const app = express();
-const server = http.createServer(app); // <-- Usado para Express + WS
-
-const wss = new Server({ server }); // WebSocket server
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
 
 app.use(cors());
 app.use(express.json());
@@ -37,6 +41,7 @@ client.on('message', (topic, message) => {
   if (topic === 'carrinho/camera') {
     ultimaImagemBuffer = Buffer.from(message);
     console.log('Imagem recebida da câmera via MQTT');
+    io.emit('camera-image', ultimaImagemBuffer); // envia imagem para todos os clientes conectados
   }
 });
 
@@ -71,24 +76,25 @@ app.post('/upload', upload.single('image'), (req, res) => {
   console.log(imageBuffer);
 
   ultimaImagemBuffer = imageBuffer;
+  io.emit('camera-image', ultimaImagemBuffer); // envia imagem para os clientes conectados via Socket.IO
 
   res.status(200).send('Imagem recebida com sucesso!');
 });
 
-// === WebSocket ===
-wss.on('connection', (ws) => {
-  console.log('Novo cliente WebSocket conectado');
+// === Socket.IO ===
+io.on('connection', (socket) => {
+  console.log('Novo cliente Socket.IO conectado');
 
-  ws.on('message', (data, isBinary) => {
-    if (isBinary) {
-      ultimaImagemBuffer = Buffer.from(data);
-      console.log('Imagem recebida via WebSocket');
-    } else {
-      console.log('Mensagem WS:', data.toString());
-    }
+  socket.emit('mensagem', 'Conexão Socket.IO estabelecida');
+
+  socket.on('imagem', (data) => {
+    ultimaImagemBuffer = Buffer.from(data);
+    console.log('Imagem recebida via Socket.IO');
   });
 
-  ws.send('Conexão WebSocket estabelecida');
+  socket.on('mensagem', (msg) => {
+    console.log('Mensagem recebida via Socket.IO:', msg);
+  });
 });
 
 // === Start do servidor ===
