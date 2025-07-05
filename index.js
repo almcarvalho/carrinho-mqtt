@@ -80,6 +80,28 @@ app.post('/upload', upload.single('image'), (req, res) => {
   res.status(200).send('Imagem recebida com sucesso!');
 });
 
+app.post('/upload64', (req, res) => {
+  const { imagemBase64 } = req.body;
+
+  if (!imagemBase64) {
+    return res.status(400).send('Campo "imagemBase64" é obrigatório');
+  }
+
+  try {
+    // Remove prefixo se vier com "data:image/jpeg;base64,..."
+    const base64Data = imagemBase64.replace(/^data:image\/\w+;base64,/, '');
+    ultimaImagemBuffer = Buffer.from(base64Data, 'base64');
+
+    console.log('Imagem recebida via POST /upload64');
+    io.emit('camera-image', imagemBase64); // envia para os clientes em base64
+
+    res.status(200).send('Imagem Base64 recebida com sucesso!');
+  } catch (err) {
+    console.error('Erro ao processar imagem base64:', err.message);
+    res.status(500).send('Erro ao processar a imagem base64');
+  }
+});
+
 // === Socket.IO ===
 io.on('connection', (socket) => {
   console.log('Novo cliente Socket.IO conectado');
