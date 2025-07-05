@@ -3,7 +3,7 @@ const mqtt = require('mqtt');
 const cors = require('cors');
 const multer = require('multer');
 const http = require('http');
-const { Server } = require('socket.io'); // socket.io
+const { Server } = require('socket.io');
 
 const upload = multer();
 const app = express();
@@ -41,7 +41,7 @@ client.on('message', (topic, message) => {
   if (topic === 'carrinho/camera') {
     ultimaImagemBuffer = Buffer.from(message);
     console.log('Imagem recebida da câmera via MQTT');
-    io.emit('camera-image', ultimaImagemBuffer); // envia imagem para todos os clientes conectados
+    io.emit('camera-image', ultimaImagemBuffer.toString('base64')); // envia em base64
   }
 });
 
@@ -73,10 +73,9 @@ app.get('/camera', (req, res) => {
 app.post('/upload', upload.single('image'), (req, res) => {
   const imageBuffer = req.file.buffer;
   console.log("Imagem recebida via HTTPS:");
-  console.log(imageBuffer);
-
   ultimaImagemBuffer = imageBuffer;
-  io.emit('camera-image', ultimaImagemBuffer); // envia imagem para os clientes conectados via Socket.IO
+
+  io.emit('camera-image', imageBuffer.toString('base64')); // envia imagem para os clientes conectados em base64
 
   res.status(200).send('Imagem recebida com sucesso!');
 });
@@ -84,12 +83,20 @@ app.post('/upload', upload.single('image'), (req, res) => {
 // === Socket.IO ===
 io.on('connection', (socket) => {
   console.log('Novo cliente Socket.IO conectado');
-
   socket.emit('mensagem', 'Conexão Socket.IO estabelecida');
 
-  socket.on('imagem', (data) => {
-    ultimaImagemBuffer = Buffer.from(data);
-    console.log('Imagem recebida via Socket.IO');
+  socket.on('imagem', (base64Image) => {
+    try {
+      // Remove prefixo se vier como "data:image/jpeg;base64,..."
+      const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
+      ultimaImagemBuffer = Buffer.from(base64Data, 'base64');
+      console.log('Imagem recebida via Socket.IO em Base64');
+
+      // (opcional) reenviar para os outros clientes
+      socket.broadcast.emit('camera-image', base64Image);
+    } catch (e) {
+      console.error('Erro ao processar imagem base64:', e.message);
+    }
   });
 
   socket.on('mensagem', (msg) => {
